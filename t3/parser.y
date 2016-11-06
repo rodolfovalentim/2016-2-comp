@@ -72,7 +72,7 @@ func-decl:
   func-header func-body                     { $$ = new_subtree(FUNC_DECL_NODE, 2, $1, $2);  scope++;}
 
 func-header:
-  ret-type ID LPAREN params RPAREN          { $$ = new_subtree(FUNC_HEADER_NODE, 3, $1, $2, $4); int index = get_index($2); int params_size = get_children_size($4); decl_function (index, params_size, yylineno); set_type($2, "id");}
+  ret-type ID LPAREN params RPAREN          { $$ = new_subtree(FUNC_HEADER_NODE, 3, $1, $2, $4); int index = get_index($2); int params_size = get_children_size($4); index = decl_function (index, params_size, yylineno); set_type($2, "id"); set_index($2, index);}
 
 func-body:
   LBRACE opt-var-decl opt-stmt-list RBRACE   { $$ = new_subtree(FUNC_BODY_NODE, 2, $2, $3); }
@@ -98,8 +98,8 @@ param-list:
 | param                    { $$ = new_subtree(PARAM_LIST_NODE, 1, $1); }
 
 param:
-  INT ID                   { $$ = new_subtree(PARAM_NODE, 1, $2); int index = get_index($2); index = decl_variable (index, "svar", scope, yylineno); set_type($2, "svar"); set_index($2, index);}
-| INT ID LBRACK RBRACK     { $$ = new_subtree(PARAM_NODE, 1, $2); int index = get_index($2); index = decl_variable (index, "cvar", scope, yylineno); set_type($2, "cvar"); set_index($2, index);}
+  INT ID                   { $$ = $2; int index = get_index($2); index = decl_variable (index, "svar", scope, yylineno); set_type($2, "svar"); set_index($2, index);}
+| INT ID LBRACK RBRACK     { $$ = $2; int index = get_index($2); index = decl_variable (index, "cvar", scope, yylineno); set_type($2, "cvar"); set_index($2, index);}
 
 var-decl-list:
   var-decl-list var-decl   { $$ = $1; add_child($1, $2); }
@@ -107,7 +107,7 @@ var-decl-list:
 
 var-decl:
   INT ID SEMI                     { $$ = $2;                    int index = get_index($2); index = decl_variable (index, "svar", scope, yylineno); set_type($2, "svar"); set_index($2, index);}
-| INT ID LBRACK NUM RBRACK SEMI   { $$ = $2; add_child($2, $4); int index = get_index($2); index = decl_variable (index, "cvar", scope, yylineno); set_type($2, "cvar"); set_index($2, index);} //TODO Alocar NUM vezes
+| INT ID LBRACK NUM RBRACK SEMI   { $$ = $2; add_child($2, $4); int index = get_index($2); index = decl_variable (index, "cvar", scope, yylineno); set_type($2, "cvar"); set_index($2, index);}
 
 stmt-list:
   stmt-list stmt       { $$ = $1; add_child($1, $2); }
@@ -125,7 +125,8 @@ assign-stmt:
 
 lval:
   ID                      { $$ = $1;                    int index = get_index($1); index = use_variable (index, scope, yylineno); set_index($1, index); set_type($1, "svar");}
-| ID LBRACK ID RBRACK     { $$ = $1; add_child($1, $3); int index = get_index($1); index = use_variable (index, scope, yylineno); set_index($1, index); set_type($1, "cvar");}
+| ID LBRACK ID RBRACK     { $$ = $1; add_child($1, $3); int index = get_index($1); index = use_variable (index, scope, yylineno); set_index($1, index); set_type($1, "cvar");
+                                                            index = get_index($3); index = use_variable (index, scope, yylineno); set_index($3, index); set_type($3, "svar");}
 | ID LBRACK NUM RBRACK    { $$ = $1; add_child($1, $3); int index = get_index($1); index = use_variable (index, scope, yylineno); set_index($1, index); set_type($1, "cvar");}
 
 if-stmt:
@@ -157,7 +158,7 @@ write-call:
   WRITE LPAREN STRING RPAREN           { $$ = new_subtree(WRITE_NODE, 1, $3); }
 
 user-func-call:
-  ID LPAREN opt-arg-list RPAREN        { $$ = new_subtree(USER_FUNC_CALL_NODE, 1, $3); int index = get_index($1); index = use_function (index, get_children_size($3), yylineno); set_index($1, index); }
+  ID LPAREN opt-arg-list RPAREN        { $$ = new_subtree(USER_FUNC_CALL_NODE, 1, $3); int index = get_index($1); index = use_function(index, get_children_size($3), yylineno); set_index($1, index); set_index($$, index); } //TODO TÀ DANDO ERRO
 
 opt-arg-list:
   %empty   { $$ = new_subtree(ARG_LIST_NODE, 0);}
@@ -238,7 +239,7 @@ int use_function (int index, int args, int line) {
   }
   int n_args = get_func_args(FuncT, i);
   if(args != n_args) {
-    printf("SEMANTIC ERROR (%d): function ’%s’ was called with %d arguments but declared with %d parameters.\n", line, name, args, n_args);
+    printf("SEMANTIC ERROR (%d): function '%s' was called with %d arguments but declared with %d parameters.\n", line, name, args, n_args);
     exit(-1);
   }
   return i;
@@ -252,14 +253,13 @@ int main() {
   AuxT = create_aux_table();
 
   if (yyparse() == 0) {
-    printf("PARSE SUCESSFUL!\n\n");
     //print_dot(tree);
+    printf("PARSE SUCESSFUL!\n\n");
     print_lit_table(LitT);
     printf("\n\n");
     print_sym_table(SymT);
     printf("\n\n");
     print_func_table(FuncT);
-    printf("\n\n");
   }
 
   free_tree(tree);

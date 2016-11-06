@@ -116,7 +116,7 @@ int get_var_scope(SymTable* st, int i) {
 }
 
 void print_sym_table(SymTable* st) {
-        printf("Symbols table:\n");
+        printf("Variables table:\n");
         for (int i = 0; i < st->size; i++) {
                 printf("Entry %d -- name: %s, line: %d, scope: %d\n", i, get_var_name(st, i), get_var_line(st, i), get_var_scope(st, i));
         }
@@ -180,7 +180,7 @@ int get_func_args(FuncTable* st, int i) {
 }
 
 void print_func_table(FuncTable* st) {
-        printf("Function table:\n");
+        printf("Functions table:\n");
         for (int i = 0; i < st->size; i++) {
                 printf("Entry %d -- name: %s, line: %d, arity: %d\n", i, get_func_name(st, i), get_func_line(st, i), get_func_args(st, i));
         }

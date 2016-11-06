@@ -1,9 +1,9 @@
 #!/bin/bash
 
 DATA=/home/rodolfo/Workspace/2016-2-comp
-IN1=$DATA/t2/out
-IN2=$DATA/t2/my-out
-OUT=$DATA/t2/"diff"
+IN1=$DATA/t3/out3
+IN2=$DATA/t3/my-out
+OUT=$DATA/t3/"diff"
 
 mkdir -p $OUT
 rm -f $OUT/*

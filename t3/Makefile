@@ -10,6 +10,11 @@ flex: scanner.l
 gcc: scanner.c parser.c tables.c
 	gcc -Wall -o trab3 scanner.c parser.c tables.c tree.c -ly
 
+git:
+	git add .
+	git commit -m "Automatic commit"
+	git push origin master
+
 clean:
 	@rm -f scanner.c scanner
 	rm -f trab3

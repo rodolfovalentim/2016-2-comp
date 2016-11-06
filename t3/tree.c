@@ -113,7 +113,7 @@ void node2str(Tree *node, char *s) {
         case LE_NODE: sprintf(s, "%s","<=" ); break;
         case GT_NODE: sprintf(s, "%s",">" ); break;
         case GE_NODE: sprintf(s, "%s",">=" ); break;
-        case EQ_NODE: sprintf(s, "%s","=" ); break;
+        case EQ_NODE: sprintf(s, "%s","==" ); break;
         case NEQ_NODE: sprintf(s, "%s","!=" ); break;
         case ASSIGN_NODE: sprintf(s, "%s","=" ); break;
         case SEMI_NODE: sprintf(s, "%s",";" ); break;
@@ -138,7 +138,7 @@ void node2str(Tree *node, char *s) {
         case ARG_LIST_NODE: sprintf(s, "%s", "arg_list"); break;
         case BLOCK_NODE: sprintf(s, "%s", "block"); break;
         case VAR_LIST_NODE: sprintf(s, "%s", "var_list"); break;
-        case USER_FUNC_CALL_NODE: sprintf(s, "%s", "fcall"); break;
+        case USER_FUNC_CALL_NODE: sprintf(s, "%s,%d", "fcall", node->index); break;
         default: printf("Invalid node kind: %d!\n", node->kind);
         }
 }
