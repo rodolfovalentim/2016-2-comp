@@ -65,6 +65,7 @@ void free_lit_table(LitTable* lt) {
 typedef struct {
         char name[SYMBOL_MAX_SIZE];
         char type[TYPE_MAX_SIZE];
+        int scope;
         int line;
 } Entry;
 
@@ -79,18 +80,19 @@ SymTable* create_sym_table() {
         return st;
 }
 
-int lookup_var(SymTable* st, char* s) {
+int lookup_var(SymTable* st, char* s, int scope) {
         for (int i = 0; i < st->size; i++) {
-                if (strcmp(st->t[i].name, s) == 0)  {
+                if (strcmp(st->t[i].name, s) == 0 && st->t[i].scope == scope)  {
                         return i;
                 }
         }
         return -1;
 }
 
-int add_var(SymTable* st, char* s, char* t, int line) {
+int add_var(SymTable* st, char* s, char* t, int scope, int line) {
         strcpy(st->t[st->size].name, s);
         strcpy(st->t[st->size].type, t);
+        st->t[st->size].scope = scope;
         st->t[st->size].line = line;
         int old_side = st->size;
         st->size++;
@@ -109,10 +111,14 @@ char* get_var_type(SymTable* st, int i) {
         return st->t[i].type;
 }
 
+int get_var_scope(SymTable* st, int i) {
+        return st->t[i].scope;
+}
+
 void print_sym_table(SymTable* st) {
         printf("Symbols table:\n");
         for (int i = 0; i < st->size; i++) {
-                printf("Entry %d -- name: %s, line: %d\n", i, get_var_name(st, i), get_var_line(st, i));
+                printf("Entry %d -- name: %s, line: %d, scope: %d\n", i, get_var_name(st, i), get_var_line(st, i), get_var_scope(st, i));
         }
 }
 
@@ -145,7 +151,7 @@ FuncTable* create_func_table() {
 
 int lookup_func(FuncTable* st, char* s, int args) {
         for (int i = 0; i < st->size; i++) {
-                if (strcmp(st->t[i].name, s) == 0 && st->t[i].size_args == args)  {
+                if (strcmp(st->t[i].name, s) == 0)  {
                         return i;
                 }
         }
@@ -176,7 +182,7 @@ int get_func_args(FuncTable* st, int i) {
 void print_func_table(FuncTable* st) {
         printf("Function table:\n");
         for (int i = 0; i < st->size; i++) {
-                printf("Entry %d -- name: %s, line: %d\n", i, get_func_name(st, i), get_func_line(st, i));
+                printf("Entry %d -- name: %s, line: %d, arity: %d\n", i, get_func_name(st, i), get_func_line(st, i), get_func_args(st, i));
         }
 }
 

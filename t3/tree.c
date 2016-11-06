@@ -133,7 +133,7 @@ void node2str(Tree *node, char *s) {
         case FUNC_BODY_NODE: sprintf(s, "%s", "func_body"); break;
         case PARAM_LIST_NODE: sprintf(s, "%s", "param_list"); break;
         case PARAM_NODE: sprintf(s, "%s", "param"); break;
-        case VAR_DECL_LIST_NODE: sprintf(s, "%s", "var_decl_list"); break;
+        case VAR_DECL_LIST_NODE: sprintf(s, "%s", "var_list"); break;
         case STMT_LIST_NODE: sprintf(s, "%s", "stmt_list"); break;
         case ARG_LIST_NODE: sprintf(s, "%s", "arg_list"); break;
         case BLOCK_NODE: sprintf(s, "%s", "block"); break;

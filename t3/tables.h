@@ -43,10 +43,10 @@ SymTable* create_sym_table();
 // Adds a fresh var to the table.
 // No check is made by this function, so make sure to call 'lookup_var' first.
 // Returns the index where the variable was inserted.
-int add_var(SymTable* st, char* s, char* type, int line);
+int add_var(SymTable* st, char* s, char* type, int scope, int line);
 
 // Returns the index where the given variable is stored or -1 otherwise.
-int lookup_var(SymTable* st, char* s);
+int lookup_var(SymTable* st, char* s, int scope);
 
 // Returns the variable name stored at the given index.
 // No check is made by this function, so make sure that the index is valid first.
@@ -59,6 +59,10 @@ int get_var_line(SymTable* st, int i);
 // Returns the declaration line of the variable stored at the given index.
 // No check is made by this function, so make sure that the index is valid first.
 char* get_var_type(SymTable* st, int i);
+
+// Returns the scope of the variable stored at the given index.
+// No check is made by this function, so make sure that the index is valid first.
+int get_var_scope(SymTable* st, int i);
 
 // Prints the given table to stdout.
 void print_sym_table(SymTable* st);

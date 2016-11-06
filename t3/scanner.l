@@ -76,9 +76,9 @@ comments   "/*"
 "}"			      { yylval = new_node(RBRACE_NODE); return RBRACE; }
 "{"			      { yylval = new_node(LBRACE_NODE); return LBRACE; }
 
-{number}			{ yylval = new_node(NUM_NODE);    int index = add_literal(LitT, yytext, "num");    set_index(yylval, index); return NUM;    }
-{identifier}  { yylval = new_node(ID_NODE);     int index = add_id(AuxT, yytext);                set_index(yylval, index); return ID;     }
-{string}			{ yylval = new_node(STRING_NODE); int index = add_literal(LitT, yytext, "string"); set_index(yylval, index); return STRING; }
+{number}			{ yylval = new_node(NUM_NODE);    set_type(yylval, "num");    set_index(yylval, atoi(yytext));                                           return NUM;    }
+{identifier}  { yylval = new_node(ID_NODE);     set_type(yylval, "id");     int index = add_id(AuxT, yytext);                set_index(yylval, index); return ID;     }
+{string}			{ yylval = new_node(STRING_NODE); set_type(yylval, "string"); int index = add_literal(LitT, yytext, "string"); set_index(yylval, index); return STRING; }
 
 
 [ \t]+			                     /* eat up whitespace */
