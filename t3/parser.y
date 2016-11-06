@@ -253,13 +253,15 @@ int main() {
   AuxT = create_aux_table();
 
   if (yyparse() == 0) {
-    //print_dot(tree);
-    printf("PARSE SUCESSFUL!\n\n");
-    print_lit_table(LitT);
-    printf("\n\n");
-    print_sym_table(SymT);
-    printf("\n\n");
-    print_func_table(FuncT);
+      printf("PARSE SUCESSFUL!\n\n");
+      /*
+      print_dot(tree);
+      */
+      print_lit_table(LitT);
+      printf("\n\n");
+      print_sym_table(SymT);
+      printf("\n\n");
+      print_func_table(FuncT);
   }
 
   free_tree(tree);
