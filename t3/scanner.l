@@ -71,7 +71,6 @@ comments   "/*"
 {identifier}  { yylval = new_node(ID_NODE);     set_type(yylval, "id");     int index = add_id(AuxT, yytext);                set_index(yylval, index); return ID;     }
 {string}			{ yylval = new_node(STRING_NODE); set_type(yylval, "string"); int index = add_literal(LitT, yytext, "string"); set_index(yylval, index); return STRING; }
 
-
 [ \t]+			                     /* eat up whitespace */
 "\n"			           yylineno++; /* eat up a single line */
 
