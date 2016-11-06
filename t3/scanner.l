@@ -23,16 +23,7 @@ extern SymTable* SymT;
 extern FuncTable* FuncT;
 extern AuxTable* AuxT;
 
-//TODO se as variaveis/funcoes utilizadas foram declaradas;
-//TODO se há variaveis/funcoes redeclaradas; e
-//TODO se o numero de argumentos (aridade) de uma chamada de funcao esta correto.
-//NOTE SEMANTIC ERROR (XX): variable ’VV’ was not declared.
-//NOTE SEMANTIC ERROR (XX): function ’FF’ was not declared.
-//NOTE SEMANTIC ERROR (XX): variable ’VV’ already declared at line YY.
-//NOTE SEMANTIC ERROR (XX): function ’FF’ already declared at line YY.
-//NOTE SEMANTIC ERROR (XX): function ’FF’ was called with AA arguments but declared with PP parameters.
 %}
-
 
 number		  [0-9]+
 identifier	[a-zA-Z][a-zA-Z0-9]*
