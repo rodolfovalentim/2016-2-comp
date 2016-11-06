@@ -12,17 +12,16 @@
 %option noinput
 
 %{
-#include "bt.h"
+#include "tree.h"
 #include "parser.h"
 #include "tables.h"
-
 
 void process_error();
 
 extern LitTable* LitT;
 extern SymTable* SymT;
-extern SymTable* SymT_aux;
-extern Var_Type last_type;
+extern FuncTable* FuncT;
+extern AuxTable* AuxT;
 
 //TODO se as variaveis/funcoes utilizadas foram declaradas;
 //TODO se há variaveis/funcoes redeclaradas; e
@@ -48,38 +47,38 @@ comments   "/*"
 
 %%
 
-"if"			    { yylval = new_leaf(IF_NODE, yytext); return IF;         }
-"else"			  { yylval = new_leaf(ELSE_NODE, yytext); return ELSE;     }
-"input"			  { yylval = new_leaf(INPUT_NODE, yytext); return INPUT;   }
-"int"			    { yylval = new_leaf(INT_NODE, yytext); return INT;       }
-"output"		  { yylval = new_leaf(OUTPUT_NODE, yytext); return OUTPUT; }
-"return"		  { yylval = new_leaf(RETURN_NODE, yytext); return RETURN; }
-"void"			  { yylval = new_leaf(VOID_NODE, yytext); return VOID;     }
-"while"			  { yylval = new_leaf(WHILE_NODE, yytext); return WHILE;   }
-"write"			  { yylval = new_leaf(WRITE_NODE, yytext); return WRITE;   }
-"+"			      { yylval = new_leaf(PLUS_NODE, yytext); return PLUS;     }
-"-"			      { yylval = new_leaf(MINUS_NODE, yytext); return MINUS;   }
-"*"			      { yylval = new_leaf(TIMES_NODE, yytext); return TIMES;   }
-"/"			      { yylval = new_leaf(OVER_NODE, yytext); return OVER;     }
-"<"			      { yylval = new_leaf(LT_NODE, yytext); return LT;         }
-"<="          { yylval = new_leaf(LE_NODE, yytext); return LE;         }
-">"           { yylval = new_leaf(GT_NODE, yytext); return GT;         }
-">="          { yylval = new_leaf(GE_NODE, yytext); return GE;         }
-"=="          { yylval = new_leaf(EQ_NODE, yytext); return EQ;         }
-"!="          { yylval = new_leaf(NEQ_NODE, yytext); return NEQ;       }
-"="			      { yylval = new_leaf(ASSIGN_NODE, yytext); return ASSIGN; }
-";"			      { yylval = new_leaf(SEMI_NODE, yytext); return SEMI;     }
-","			      { yylval = new_leaf(COMMA_NODE, yytext); return COMMA;   }
-"("			      { yylval = new_leaf(LPAREN_NODE, yytext); return LPAREN; }
-")"			      { yylval = new_leaf(RPAREN_NODE, yytext); return RPAREN; }
-"["			      { yylval = new_leaf(LBRACK_NODE, yytext); return LBRACK; }
-"]"			      { yylval = new_leaf(RBRACK_NODE, yytext); return RBRACK; }
-"}"			      { yylval = new_leaf(RBRACE_NODE, yytext); return RBRACE; }
-"{"			      { yylval = new_leaf(LBRACE_NODE, yytext); return LBRACE; }
+"if"			    { yylval = new_node(IF_NODE); return IF;         }
+"else"			  { yylval = new_node(ELSE_NODE); return ELSE;     }
+"input"			  { yylval = new_node(INPUT_NODE); return INPUT;   }
+"int"			    { yylval = new_node(INT_NODE); return INT;       }
+"output"		  { yylval = new_node(OUTPUT_NODE); return OUTPUT; }
+"return"		  { yylval = new_node(RETURN_NODE); return RETURN; }
+"void"			  { yylval = new_node(VOID_NODE); return VOID;     }
+"while"			  { yylval = new_node(WHILE_NODE); return WHILE;   }
+"write"			  { yylval = new_node(WRITE_NODE); return WRITE;   }
+"+"			      { yylval = new_node(PLUS_NODE); return PLUS;     }
+"-"			      { yylval = new_node(MINUS_NODE); return MINUS;   }
+"*"			      { yylval = new_node(TIMES_NODE); return TIMES;   }
+"/"			      { yylval = new_node(OVER_NODE); return OVER;     }
+"<"			      { yylval = new_node(LT_NODE); return LT;         }
+"<="          { yylval = new_node(LE_NODE); return LE;         }
+">"           { yylval = new_node(GT_NODE); return GT;         }
+">="          { yylval = new_node(GE_NODE); return GE;         }
+"=="          { yylval = new_node(EQ_NODE); return EQ;         }
+"!="          { yylval = new_node(NEQ_NODE); return NEQ;       }
+"="			      { yylval = new_node(ASSIGN_NODE); return ASSIGN; }
+";"			      { yylval = new_node(SEMI_NODE); return SEMI;     }
+","			      { yylval = new_node(COMMA_NODE); return COMMA;   }
+"("			      { yylval = new_node(LPAREN_NODE); return LPAREN; }
+")"			      { yylval = new_node(RPAREN_NODE); return RPAREN; }
+"["			      { yylval = new_node(LBRACK_NODE); return LBRACK; }
+"]"			      { yylval = new_node(RBRACK_NODE); return RBRACK; }
+"}"			      { yylval = new_node(RBRACE_NODE); return RBRACE; }
+"{"			      { yylval = new_node(LBRACE_NODE); return LBRACE; }
 
-{number}			{ yylval = new_leaf(NUM_NODE, yytext); return NUM;      }
-{identifier}  { yylval = new_leaf(ID_NODE, yytext); return ID;        }
-{string}			{ yylval = new_leaf(STRING_NODE, yytext); return STRING;}
+{number}			{ yylval = new_node(NUM_NODE);    int index = add_literal(LitT, yytext, "num");    set_index(yylval, index); return NUM;    }
+{identifier}  { yylval = new_node(ID_NODE);     int index = add_id(AuxT, yytext);                set_index(yylval, index); return ID;     }
+{string}			{ yylval = new_node(STRING_NODE); int index = add_literal(LitT, yytext, "string"); set_index(yylval, index); return STRING; }
 
 
 [ \t]+			                     /* eat up whitespace */

@@ -66,23 +66,25 @@
 
 #include <stdlib.h>
 #include <stdio.h>
-#include "bt.h"
+#include "tree.h"
 #include "parser.h"
 #include "tables.h"
 
 extern int yylineno;
 int yylex(void);
 void yyerror(char const *s);
-void decl_variable (int index, Var_Type type, int line);
-void use_variable  (int index, int line);
+void decl_variable (int index, char* type, int line);
+int use_variable  (int index, int line);
+void decl_function (int index, int size_args, int line);
+int use_funtion   (int index, int line);
 
 LitTable* LitT;
 SymTable* SymT;
-SymTable* SymT_aux;
-Var_Type last_type = T_UNDEFINED;
-BT *tree;
+FuncTable* FuncT;
+AuxTable* AuxT;
+Tree *tree;
 
-#line 86 "parser.c" /* yacc.c:339  */
+#line 88 "parser.c" /* yacc.c:339  */
 
 # ifndef YY_NULLPTR
 #  if defined __cplusplus && 201103L <= __cplusplus
@@ -153,7 +155,7 @@ extern int yydebug;
 
 /* Value type.  */
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
-typedef BT* YYSTYPE;
+typedef Tree* YYSTYPE;
 # define YYSTYPE_IS_TRIVIAL 1
 # define YYSTYPE_IS_DECLARED 1
 #endif
@@ -167,7 +169,7 @@ int yyparse (void);
 
 /* Copy the second part of user declarations.  */
 
-#line 171 "parser.c" /* yacc.c:358  */
+#line 173 "parser.c" /* yacc.c:358  */
 
 #ifdef short
 # undef short
@@ -444,13 +446,13 @@ static const yytype_uint8 yytranslate[] =
   /* YYRLINE[YYN] -- Source line where rule number YYN was defined.  */
 static const yytype_uint8 yyrline[] =
 {
-       0,    62,    62,    65,    66,    68,    70,    72,    75,    76,
-      79,    80,    83,    84,    87,    88,    91,    92,    95,    96,
-      99,   100,   103,   104,   107,   108,   111,   112,   113,   114,
-     115,   117,   120,   121,   122,   125,   126,   128,   130,   133,
-     134,   137,   138,   139,   141,   143,   145,   147,   149,   149,
-     152,   153,   156,   157,   158,   159,   160,   161,   164,   165,
-     166,   167,   168,   169,   170,   171,   172
+       0,    64,    64,    67,    68,    71,    74,    77,    80,    81,
+      84,    85,    88,    89,    92,    93,    96,    97,   100,   101,
+     104,   105,   108,   109,   112,   113,   116,   117,   118,   119,
+     120,   123,   126,   127,   128,   131,   132,   135,   138,   141,
+     142,   145,   146,   147,   150,   153,   156,   159,   162,   163,
+     166,   167,   170,   171,   172,   173,   174,   175,   178,   179,
+     180,   181,   182,   183,   184,   185,   186
 };
 #endif
 
@@ -528,7 +530,7 @@ static const yytype_uint8 yydefact[] =
        0,     0,     0,     0,     0,     0,    40,     0,     0,     0,
       49,    51,     0,     0,     0,     0,    16,     0,     0,     0,
        0,     0,     0,     0,     0,    45,    44,    62,    58,    59,
-      60,    61,     0,    46,    47,     0,    33,    34,    31,    19,
+      60,    61,     0,    46,    47,     0,    34,    33,    31,    19,
       23,    10,    35,    52,    53,    54,    55,    56,    57,    38,
       50,     0,     0,    37,    36
 };
@@ -1560,68 +1562,398 @@ yyreduce:
     int yychar_backup = yychar;
     switch (yyn)
       {
-          case 52:
+          case 2:
+#line 64 "parser.y" /* yacc.c:1646  */
+    { tree = (yyvsp[0]); }
+#line 1569 "parser.c" /* yacc.c:1646  */
+    break;
+
+  case 3:
+#line 67 "parser.y" /* yacc.c:1646  */
+    { (yyval) = (yyvsp[-1]);  add_child((yyvsp[-1]), (yyvsp[0])); }
+#line 1575 "parser.c" /* yacc.c:1646  */
+    break;
+
+  case 4:
+#line 68 "parser.y" /* yacc.c:1646  */
+    { (yyval) = new_subtree(FUNC_DECL_LIST_NODE, 1, (yyvsp[0])); }
+#line 1581 "parser.c" /* yacc.c:1646  */
+    break;
+
+  case 5:
+#line 71 "parser.y" /* yacc.c:1646  */
+    { (yyval) = new_subtree(FUNC_DECL_NODE, 2, (yyvsp[-1]), (yyvsp[0]));  }
+#line 1587 "parser.c" /* yacc.c:1646  */
+    break;
+
+  case 6:
+#line 74 "parser.y" /* yacc.c:1646  */
+    { (yyval) = new_subtree(FUNC_HEADER_NODE, 3, (yyvsp[-4]), (yyvsp[-3]), (yyvsp[-1])); int index = get_index((yyvsp[-3])); int params_size = get_children_size((yyvsp[-1])); decl_function (index, params_size, yylineno); set_type((yyvsp[-3]), "id");}
+#line 1593 "parser.c" /* yacc.c:1646  */
+    break;
+
+  case 7:
+#line 77 "parser.y" /* yacc.c:1646  */
+    { (yyval) = new_subtree(FUNC_BODY_NODE, 2, (yyvsp[-2]), (yyvsp[-1])); }
+#line 1599 "parser.c" /* yacc.c:1646  */
+    break;
+
+  case 8:
+#line 80 "parser.y" /* yacc.c:1646  */
+    {  (yyval) = new_subtree(VAR_LIST_NODE, 0); }
+#line 1605 "parser.c" /* yacc.c:1646  */
+    break;
+
+  case 9:
+#line 81 "parser.y" /* yacc.c:1646  */
+    {  (yyval) = (yyvsp[0]); }
+#line 1611 "parser.c" /* yacc.c:1646  */
+    break;
+
+  case 10:
+#line 84 "parser.y" /* yacc.c:1646  */
+    {  (yyval) = new_subtree(BLOCK_NODE, 0); }
+#line 1617 "parser.c" /* yacc.c:1646  */
+    break;
+
+  case 11:
+#line 85 "parser.y" /* yacc.c:1646  */
+    {  (yyval) = (yyvsp[0]); }
+#line 1623 "parser.c" /* yacc.c:1646  */
+    break;
+
+  case 12:
+#line 88 "parser.y" /* yacc.c:1646  */
+    { (yyval) = (yyvsp[0]); }
+#line 1629 "parser.c" /* yacc.c:1646  */
+    break;
+
+  case 13:
+#line 89 "parser.y" /* yacc.c:1646  */
+    { (yyval) = (yyvsp[0]); }
+#line 1635 "parser.c" /* yacc.c:1646  */
+    break;
+
+  case 14:
+#line 92 "parser.y" /* yacc.c:1646  */
+    { (yyval) = new_subtree(PARAM_LIST_NODE, 0); }
+#line 1641 "parser.c" /* yacc.c:1646  */
+    break;
+
+  case 15:
+#line 93 "parser.y" /* yacc.c:1646  */
+    { (yyval) = (yyvsp[0]); }
+#line 1647 "parser.c" /* yacc.c:1646  */
+    break;
+
+  case 16:
+#line 96 "parser.y" /* yacc.c:1646  */
+    { (yyval) = (yyvsp[-2]); add_child((yyvsp[-2]), (yyvsp[0])); }
+#line 1653 "parser.c" /* yacc.c:1646  */
+    break;
+
+  case 17:
+#line 97 "parser.y" /* yacc.c:1646  */
+    { (yyval) = new_subtree(PARAM_LIST_NODE, 1, (yyvsp[0])); }
+#line 1659 "parser.c" /* yacc.c:1646  */
+    break;
+
+  case 18:
+#line 100 "parser.y" /* yacc.c:1646  */
+    { (yyval) = new_subtree(PARAM_NODE, 1, (yyvsp[0])); }
+#line 1665 "parser.c" /* yacc.c:1646  */
+    break;
+
+  case 19:
+#line 101 "parser.y" /* yacc.c:1646  */
+    { (yyval) = new_subtree(PARAM_NODE, 1, (yyvsp[-2])); }
+#line 1671 "parser.c" /* yacc.c:1646  */
+    break;
+
+  case 20:
+#line 104 "parser.y" /* yacc.c:1646  */
+    { (yyval) = (yyvsp[-1]); add_child((yyvsp[-1]), (yyvsp[0])); }
+#line 1677 "parser.c" /* yacc.c:1646  */
+    break;
+
+  case 21:
+#line 105 "parser.y" /* yacc.c:1646  */
+    { (yyval) = new_subtree(VAR_DECL_LIST_NODE, 1, (yyvsp[0])); }
+#line 1683 "parser.c" /* yacc.c:1646  */
+    break;
+
+  case 22:
+#line 108 "parser.y" /* yacc.c:1646  */
+    { (yyval) = (yyvsp[-1]); int index = get_index((yyvsp[-1])); decl_variable (index, "svar", yylineno); set_type((yyvsp[-1]), "svar"); }
+#line 1689 "parser.c" /* yacc.c:1646  */
+    break;
+
+  case 23:
+#line 109 "parser.y" /* yacc.c:1646  */
+    { (yyval) = (yyvsp[-4]); add_child((yyvsp[-4]), (yyvsp[-2])); int index = get_index((yyvsp[-4])); decl_variable (index, "cvar", yylineno); set_type((yyvsp[-4]), "cvar");}
+#line 1695 "parser.c" /* yacc.c:1646  */
+    break;
+
+  case 24:
+#line 112 "parser.y" /* yacc.c:1646  */
+    { (yyval) = (yyvsp[-1]); add_child((yyvsp[-1]), (yyvsp[0])); }
+#line 1701 "parser.c" /* yacc.c:1646  */
+    break;
+
+  case 25:
+#line 113 "parser.y" /* yacc.c:1646  */
+    { (yyval) = new_subtree(BLOCK_NODE, 1, (yyvsp[0])); }
+#line 1707 "parser.c" /* yacc.c:1646  */
+    break;
+
+  case 26:
+#line 116 "parser.y" /* yacc.c:1646  */
+    { (yyval) = (yyvsp[0]); }
+#line 1713 "parser.c" /* yacc.c:1646  */
+    break;
+
+  case 27:
+#line 117 "parser.y" /* yacc.c:1646  */
+    { (yyval) = (yyvsp[0]); }
+#line 1719 "parser.c" /* yacc.c:1646  */
+    break;
+
+  case 28:
+#line 118 "parser.y" /* yacc.c:1646  */
+    { (yyval) = (yyvsp[0]); }
+#line 1725 "parser.c" /* yacc.c:1646  */
+    break;
+
+  case 29:
+#line 119 "parser.y" /* yacc.c:1646  */
+    { (yyval) = (yyvsp[0]); }
+#line 1731 "parser.c" /* yacc.c:1646  */
+    break;
+
+  case 30:
+#line 120 "parser.y" /* yacc.c:1646  */
+    { (yyval) = (yyvsp[-1]); }
+#line 1737 "parser.c" /* yacc.c:1646  */
+    break;
+
+  case 31:
+#line 123 "parser.y" /* yacc.c:1646  */
+    { (yyval) = new_subtree(ASSIGN_NODE, 2, (yyvsp[-3]), (yyvsp[-1])); }
+#line 1743 "parser.c" /* yacc.c:1646  */
+    break;
+
+  case 32:
+#line 126 "parser.y" /* yacc.c:1646  */
+    { (yyval) = (yyvsp[0]); }
+#line 1749 "parser.c" /* yacc.c:1646  */
+    break;
+
+  case 33:
+#line 127 "parser.y" /* yacc.c:1646  */
+    { (yyval) = (yyvsp[-3]); add_child((yyvsp[-3]), (yyvsp[-1])); }
+#line 1755 "parser.c" /* yacc.c:1646  */
+    break;
+
+  case 34:
+#line 128 "parser.y" /* yacc.c:1646  */
+    { (yyval) = (yyvsp[-3]); add_child((yyvsp[-3]), (yyvsp[-1])); }
+#line 1761 "parser.c" /* yacc.c:1646  */
+    break;
+
+  case 35:
+#line 131 "parser.y" /* yacc.c:1646  */
+    { (yyval) = new_subtree(IF_NODE, 2, (yyvsp[-2]), (yyvsp[0]));     }
+#line 1767 "parser.c" /* yacc.c:1646  */
+    break;
+
+  case 36:
+#line 132 "parser.y" /* yacc.c:1646  */
+    { (yyval) = new_subtree(IF_NODE, 3, (yyvsp[-4]), (yyvsp[-2]), (yyvsp[0])); }
+#line 1773 "parser.c" /* yacc.c:1646  */
+    break;
+
+  case 37:
+#line 135 "parser.y" /* yacc.c:1646  */
+    { (yyval) = (yyvsp[-1]); }
+#line 1779 "parser.c" /* yacc.c:1646  */
+    break;
+
+  case 38:
+#line 138 "parser.y" /* yacc.c:1646  */
+    { (yyval) = new_subtree(WHILE_NODE, 2, (yyvsp[-2]), (yyvsp[0]));  }
+#line 1785 "parser.c" /* yacc.c:1646  */
+    break;
+
+  case 39:
+#line 141 "parser.y" /* yacc.c:1646  */
+    { (yyval) = new_subtree(RETURN_NODE, 0);         }
+#line 1791 "parser.c" /* yacc.c:1646  */
+    break;
+
+  case 40:
+#line 142 "parser.y" /* yacc.c:1646  */
+    { (yyval) = new_subtree(RETURN_NODE, 1, (yyvsp[-1]));     }
+#line 1797 "parser.c" /* yacc.c:1646  */
+    break;
+
+  case 41:
+#line 145 "parser.y" /* yacc.c:1646  */
+    { (yyval) = (yyvsp[0]); }
+#line 1803 "parser.c" /* yacc.c:1646  */
+    break;
+
+  case 42:
+#line 146 "parser.y" /* yacc.c:1646  */
+    { (yyval) = (yyvsp[0]); }
+#line 1809 "parser.c" /* yacc.c:1646  */
+    break;
+
+  case 43:
+#line 147 "parser.y" /* yacc.c:1646  */
+    { (yyval) = (yyvsp[0]); }
+#line 1815 "parser.c" /* yacc.c:1646  */
+    break;
+
+  case 44:
+#line 150 "parser.y" /* yacc.c:1646  */
+    { (yyval) = new_subtree(INPUT_NODE, 0); }
+#line 1821 "parser.c" /* yacc.c:1646  */
+    break;
+
+  case 45:
+#line 153 "parser.y" /* yacc.c:1646  */
+    { (yyval) = new_subtree(OUTPUT_NODE, 1, (yyvsp[-1])); }
+#line 1827 "parser.c" /* yacc.c:1646  */
+    break;
+
+  case 46:
 #line 156 "parser.y" /* yacc.c:1646  */
-    { (yyval) = new_node(LT_NODE , 2, (yyvsp[-2]), (yyvsp[0])); }
-#line 1567 "parser.c" /* yacc.c:1646  */
+    { (yyval) = new_subtree(WRITE_NODE, 1, (yyvsp[-1])); }
+#line 1833 "parser.c" /* yacc.c:1646  */
+    break;
+
+  case 47:
+#line 159 "parser.y" /* yacc.c:1646  */
+    { (yyval) = new_subtree(USER_FUNC_CALL_NODE, 1, (yyvsp[-1])); }
+#line 1839 "parser.c" /* yacc.c:1646  */
+    break;
+
+  case 48:
+#line 162 "parser.y" /* yacc.c:1646  */
+    { (yyval) = new_subtree(ARG_LIST_NODE, 0);}
+#line 1845 "parser.c" /* yacc.c:1646  */
+    break;
+
+  case 49:
+#line 163 "parser.y" /* yacc.c:1646  */
+    { (yyval) = (yyvsp[0]); }
+#line 1851 "parser.c" /* yacc.c:1646  */
+    break;
+
+  case 50:
+#line 166 "parser.y" /* yacc.c:1646  */
+    { (yyval) = (yyvsp[-2]); add_child((yyvsp[-2]), (yyvsp[0]));}
+#line 1857 "parser.c" /* yacc.c:1646  */
+    break;
+
+  case 51:
+#line 167 "parser.y" /* yacc.c:1646  */
+    { (yyval) = new_subtree(ARG_LIST_NODE, 1, (yyvsp[0]));}
+#line 1863 "parser.c" /* yacc.c:1646  */
+    break;
+
+  case 52:
+#line 170 "parser.y" /* yacc.c:1646  */
+    { (yyval) = new_subtree(LT_NODE , 2, (yyvsp[-2]), (yyvsp[0])); }
+#line 1869 "parser.c" /* yacc.c:1646  */
     break;
 
   case 53:
-#line 157 "parser.y" /* yacc.c:1646  */
-    { (yyval) = new_node(LE_NODE , 2, (yyvsp[-2]), (yyvsp[0])); }
-#line 1573 "parser.c" /* yacc.c:1646  */
+#line 171 "parser.y" /* yacc.c:1646  */
+    { (yyval) = new_subtree(LE_NODE , 2, (yyvsp[-2]), (yyvsp[0])); }
+#line 1875 "parser.c" /* yacc.c:1646  */
     break;
 
   case 54:
-#line 158 "parser.y" /* yacc.c:1646  */
-    { (yyval) = new_node(GT_NODE , 2, (yyvsp[-2]), (yyvsp[0])); }
-#line 1579 "parser.c" /* yacc.c:1646  */
+#line 172 "parser.y" /* yacc.c:1646  */
+    { (yyval) = new_subtree(GT_NODE , 2, (yyvsp[-2]), (yyvsp[0])); }
+#line 1881 "parser.c" /* yacc.c:1646  */
     break;
 
   case 55:
-#line 159 "parser.y" /* yacc.c:1646  */
-    { (yyval) = new_node(GE_NODE , 2, (yyvsp[-2]), (yyvsp[0])); }
-#line 1585 "parser.c" /* yacc.c:1646  */
+#line 173 "parser.y" /* yacc.c:1646  */
+    { (yyval) = new_subtree(GE_NODE , 2, (yyvsp[-2]), (yyvsp[0])); }
+#line 1887 "parser.c" /* yacc.c:1646  */
     break;
 
   case 56:
-#line 160 "parser.y" /* yacc.c:1646  */
-    { (yyval) = new_node(EQ_NODE , 2, (yyvsp[-2]), (yyvsp[0])); }
-#line 1591 "parser.c" /* yacc.c:1646  */
+#line 174 "parser.y" /* yacc.c:1646  */
+    { (yyval) = new_subtree(EQ_NODE , 2, (yyvsp[-2]), (yyvsp[0])); }
+#line 1893 "parser.c" /* yacc.c:1646  */
     break;
 
   case 57:
-#line 161 "parser.y" /* yacc.c:1646  */
-    { (yyval) = new_node(NEQ_NODE, 2, (yyvsp[-2]), (yyvsp[0])); }
-#line 1597 "parser.c" /* yacc.c:1646  */
+#line 175 "parser.y" /* yacc.c:1646  */
+    { (yyval) = new_subtree(NEQ_NODE, 2, (yyvsp[-2]), (yyvsp[0])); }
+#line 1899 "parser.c" /* yacc.c:1646  */
     break;
 
   case 58:
-#line 164 "parser.y" /* yacc.c:1646  */
-    { (yyval) = new_node(PLUS_NODE , 2, (yyvsp[-2]), (yyvsp[0])); }
-#line 1603 "parser.c" /* yacc.c:1646  */
+#line 178 "parser.y" /* yacc.c:1646  */
+    { (yyval) = new_subtree(PLUS_NODE , 2, (yyvsp[-2]), (yyvsp[0])); }
+#line 1905 "parser.c" /* yacc.c:1646  */
     break;
 
   case 59:
-#line 165 "parser.y" /* yacc.c:1646  */
-    { (yyval) = new_node(MINUS_NODE, 2, (yyvsp[-2]), (yyvsp[0])); }
-#line 1609 "parser.c" /* yacc.c:1646  */
+#line 179 "parser.y" /* yacc.c:1646  */
+    { (yyval) = new_subtree(MINUS_NODE, 2, (yyvsp[-2]), (yyvsp[0])); }
+#line 1911 "parser.c" /* yacc.c:1646  */
     break;
 
   case 60:
-#line 166 "parser.y" /* yacc.c:1646  */
-    { (yyval) = new_node(TIMES_NODE, 2, (yyvsp[-2]), (yyvsp[0])); }
-#line 1615 "parser.c" /* yacc.c:1646  */
+#line 180 "parser.y" /* yacc.c:1646  */
+    { (yyval) = new_subtree(TIMES_NODE, 2, (yyvsp[-2]), (yyvsp[0])); }
+#line 1917 "parser.c" /* yacc.c:1646  */
     break;
 
   case 61:
-#line 167 "parser.y" /* yacc.c:1646  */
-    { (yyval) = new_node(OVER_NODE , 2, (yyvsp[-2]), (yyvsp[0])); }
-#line 1621 "parser.c" /* yacc.c:1646  */
+#line 181 "parser.y" /* yacc.c:1646  */
+    { (yyval) = new_subtree(OVER_NODE , 2, (yyvsp[-2]), (yyvsp[0])); }
+#line 1923 "parser.c" /* yacc.c:1646  */
+    break;
+
+  case 62:
+#line 182 "parser.y" /* yacc.c:1646  */
+    { (yyval) = (yyvsp[-1]); int index = get_index((yyvsp[-1])); index = use_variable (index, yylineno); set_index((yyvsp[-1]), index); }
+#line 1929 "parser.c" /* yacc.c:1646  */
+    break;
+
+  case 63:
+#line 183 "parser.y" /* yacc.c:1646  */
+    { (yyval) = (yyvsp[0]); }
+#line 1935 "parser.c" /* yacc.c:1646  */
+    break;
+
+  case 64:
+#line 184 "parser.y" /* yacc.c:1646  */
+    { (yyval) = (yyvsp[0]); }
+#line 1941 "parser.c" /* yacc.c:1646  */
+    break;
+
+  case 65:
+#line 185 "parser.y" /* yacc.c:1646  */
+    { (yyval) = (yyvsp[0]); }
+#line 1947 "parser.c" /* yacc.c:1646  */
+    break;
+
+  case 66:
+#line 186 "parser.y" /* yacc.c:1646  */
+    { (yyval) = (yyvsp[0]); }
+#line 1953 "parser.c" /* yacc.c:1646  */
     break;
 
 
-#line 1625 "parser.c" /* yacc.c:1646  */
+#line 1957 "parser.c" /* yacc.c:1646  */
         default: break;
       }
     if (yychar_backup != yychar)
@@ -1861,7 +2193,7 @@ yyreturn:
 #endif
   return yyresult;
 }
-#line 174 "parser.y" /* yacc.c:1906  */
+#line 188 "parser.y" /* yacc.c:1906  */
 
 // Error handling.
 void yyerror (char const *s) {
@@ -1869,11 +2201,73 @@ void yyerror (char const *s) {
   exit(1);
 }
 
-int main() {
-  if(yyparse() == 0) {
-    printf("PARSE SUCESSFUL!\n");
-        print_tree(tree);
-        free_tree(tree);
+void decl_variable (int index, char* type, int line){
+  char* name = get_id(AuxT, index);
+  if (lookup_var(SymT, name) == -1) {
+    add_var(SymT, name, type, line);
   }
+  else {
+    printf("SEMANTIC ERROR (%d): variable '%s' already declared at line %d.\n", line, name, line);
+    exit(-1);
+  }
+  return;
+}
+
+int use_variable (int index, int line) {
+  char* name = get_id(AuxT, index);
+  int i = lookup_var(SymT, name);
+  if(i == -1){
+    printf("SEMANTIC ERROR (%d): variable '%s' was not declared.\n", line, name);
+    exit(-1);
+  }
+  return i;
+}
+
+void decl_function (int index, int line, int args){
+  char* name = get_id(AuxT, index);
+  if (lookup_func(FuncT, name, args) == -1) {
+    add_func(FuncT, name, args, line);
+  }
+  else {
+    printf("SEMANTIC ERROR (%d): Function '%s' already declared at line %d.\n", line, name, line);
+    exit(-1);
+  }
+  return;
+}
+
+int use_function (int index, int line, int args){
+  char* name = get_id(AuxT, index);
+  int i = lookup_func(FuncT, name, args);
+  if(i == -1){
+    printf("SEMANTIC ERROR (%d): Function '%s' was not declared.\n", line, name);
+    exit(-1);
+  }
+  return i;
+}
+
+int main() {
+
+  LitT = create_lit_table();
+  SymT = create_sym_table();
+  FuncT = create_func_table();
+  AuxT = create_aux_table();
+
+  if (yyparse() == 0) {
+    print_dot(tree);
+    /*printf("\n\n");
+    print_lit_table(LitT);
+    printf("\n\n");
+    print_sym_table(SymT);
+    printf("\n\n");
+    print_func_table(FuncT);
+    printf("\n\n");*/
+  }
+
+  free_tree(tree);
+  free_lit_table(LitT);
+  free_sym_table(SymT);
+  free_func_table(FuncT);
+  free_aux_table(AuxT);
+
   return 0;
 }

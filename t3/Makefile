@@ -8,7 +8,7 @@ flex: scanner.l
 	flex scanner.l
 
 gcc: scanner.c parser.c tables.c
-	gcc -Wall -o trab3 scanner.c parser.c tables.c bt.c -ly
+	gcc -Wall -o trab3 scanner.c parser.c tables.c tree.c -ly
 
 clean:
 	@rm -f scanner.c scanner
