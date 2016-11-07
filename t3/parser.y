@@ -255,13 +255,13 @@ int main() {
   if (yyparse() == 0) {
       printf("PARSE SUCESSFUL!\n\n");
       /*
-      print_dot(tree);
-      */
       print_lit_table(LitT);
       printf("\n\n");
       print_sym_table(SymT);
       printf("\n\n");
       print_func_table(FuncT);
+      print_dot(tree);
+      */
   }
 
   free_tree(tree);

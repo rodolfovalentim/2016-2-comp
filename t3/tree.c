@@ -6,22 +6,23 @@
 #include "tree.h"
 
 #define MAX_TYPE_SIZE 6
-#define CHILDREN_LIMIT 100
 #define TEXT_LIMIT 256
+int CHILDREN_LIMIT = 100;
 
 struct node {
         NodeKind kind;
         char type[MAX_TYPE_SIZE];
         int index;
         int count;
-        Tree* child[CHILDREN_LIMIT];
+        Tree** child;
 };
 
 Tree* new_node(NodeKind kind) {
         Tree* node = malloc(sizeof *node);
         node->kind = kind;
         node->count = 0;
-        node->index = 0; // NOTE: Optional, will be set later
+        node->index = 0;
+        node->child = (Tree**) malloc(CHILDREN_LIMIT*sizeof(Tree*));
         for (int i = 0; i < CHILDREN_LIMIT; i++) {
                 node->child[i] = NULL;
         }
@@ -30,8 +31,10 @@ Tree* new_node(NodeKind kind) {
 
 void add_child(Tree *parent, Tree *child) {
         if (parent->count == CHILDREN_LIMIT) {
-                fprintf(stderr, "Cannot add another child!\n");
-                exit(1);
+                Tree** tmp;
+                // fprintf(stderr, "Reallocing to add another child!\n");
+                tmp = (Tree**)realloc(parent->child, (CHILDREN_LIMIT+=100)*sizeof(Tree*));
+                parent->child = tmp;
         }
         parent->child[parent->count] = child;
         parent->count++;
@@ -58,12 +61,16 @@ int get_children_size(Tree *tree){
 }
 
 Tree* new_subtree(NodeKind kind, int child_count, ...) {
-        if (child_count > CHILDREN_LIMIT) {
-                fprintf(stderr, "Too many children as arguments!\n");
-                exit(1);
-        }
 
         Tree* node = new_node(kind);
+
+        if (child_count > CHILDREN_LIMIT) {
+                Tree** tmp;
+                // fprintf(stderr, "Reallocing to fit children!\n");
+                tmp = (Tree**)realloc(node->child, (CHILDREN_LIMIT += 100)*sizeof(Tree*));
+                node->child = tmp;
+        }
+
         va_list ap;
         va_start(ap, child_count);
         for (int i = 0; i < child_count; i++) {
