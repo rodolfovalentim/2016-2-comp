@@ -55,8 +55,9 @@ void emit_void(Tree *ast){
 void emit_id(Tree *ast){
         char* type = get_type(ast);
         if(!strcmp(type, "svar")) {
-                if(declaration)
+                if(declaration) {
                         set_var_memoffset(SymT, get_index(ast), new_tmp(1));
+                }
                 else {
                         int offset = get_var_memoffset(SymT, get_index(ast));
                         push(stack, tmp[offset]);
@@ -65,10 +66,12 @@ void emit_id(Tree *ast){
         else if(!strcmp(type, "cvar")) {
                 rec_emit_ast(get_child(ast, 0));
                 int size = pop(stack);
-                if(declaration)
+                if(declaration) {
                         set_var_memoffset(SymT, get_index(ast), new_tmp(size));
-                else
+                }
+                else {
                         get_var_memoffset(SymT, get_index(ast));
+                }
         }
 }
 
@@ -78,8 +81,8 @@ void emit_num(Tree *ast){
 
 void emit_param_list(Tree *ast) {
         for(int i = 0; i < get_children_size(ast); i++) {
-                int i = new_tmp(1);
-                tmp[i] = pop(stack);
+                int value = pop(stack);
+                get_child(ast, i);
         }
 }
 
@@ -102,6 +105,12 @@ void emit_block(Tree *ast){
         }
 }
 
+void emit_input(Tree *ast){
+        int i;
+        scanf("%d", &i);
+        push(stack, i);
+}
+
 void emit_output(Tree *ast){
         rec_emit_ast(get_child(ast, 0));
         int i = pop(stack);
@@ -111,7 +120,14 @@ void emit_output(Tree *ast){
 void emit_user_func_call(Tree *ast){
         int index = get_index(ast);
         Tree* addr_func = get_func_address(FuncT, index);
+        rec_emit_ast(get_child(ast, 0));
         rec_emit_ast(addr_func);
+}
+
+void emit_arg_list(Tree *ast){
+        for(int i = get_children_size(ast); i < 0; i--) {
+                rec_emit_ast(get_child(ast, i-1));
+        }
 }
 
 void emit_write(Tree *ast){
@@ -141,8 +157,8 @@ void emit_plus(Tree *ast){
 void emit_minus(Tree *ast){
         rec_emit_ast(get_child(ast, 0));
         rec_emit_ast(get_child(ast, 1));
-        int r = pop(stack);
         int s = pop(stack);
+        int r = pop(stack);
         push(stack, r-s);
 }
 
@@ -211,17 +227,43 @@ void emit_neq(Tree *ast){
         push(stack, r!=s);
 }
 
+void emit_if(Tree* ast){
+        rec_emit_ast(get_child(ast, 0));
+        if(pop(stack)) {
+                rec_emit_ast(get_child(ast, 1));
+        }
+        else {
+                rec_emit_ast(get_child(ast, 2));
+        }
+}
+
+void emit_while(Tree* ast){
+        rec_emit_ast(get_child(ast, 0));
+        while(pop(stack)) {
+                rec_emit_ast(get_child(ast, 1));
+                rec_emit_ast(get_child(ast, 0));
+        }
+}
+
+void emit_return(Tree *ast){
+        rec_emit_ast(get_child(ast, 0));
+        int value = pop(stack); // Dumb?
+        printf("Value: %d\n", value);
+        push(stack, value);
+}
+
 void rec_emit_ast(Tree *ast) {
         char string[10];
+        node2str(ast, string);
+        fprintf(stderr, "%s\n", string);
         switch(get_kind(ast)) {
-        // case IF_NODE: emit_if(ast); break;
-        // case ELSE_NODE: emit_else(ast); break;
-        // case INPUT_NODE: emit_input(ast); break;
+        case IF_NODE: emit_if(ast); break;
+        case INPUT_NODE: emit_input(ast); break;
         case INT_NODE: emit_int(ast); break;
         case OUTPUT_NODE: emit_output(ast); break;
         // case RETURN_NODE: emit_return(ast); break;
         case VOID_NODE: emit_void(ast); break;
-        // case WHILE_NODE: emit_while(ast); break;
+        case WHILE_NODE: emit_while(ast); break;
         case WRITE_NODE: emit_write(ast); break;
         case PLUS_NODE: emit_plus(ast); break;
         case MINUS_NODE: emit_minus(ast); break;
@@ -244,7 +286,7 @@ void rec_emit_ast(Tree *ast) {
         case PARAM_LIST_NODE: emit_param_list(ast); break;
         // case PARAM_NODE: emit_param(ast); break;
         // case STMT_LIST_NODE: emit_stmt_list(ast); break;
-        // case ARG_LIST_NODE: emit_arg_list(ast); break;
+        case ARG_LIST_NODE: emit_arg_list(ast); break;
         case BLOCK_NODE: emit_block(ast); break;
         case VAR_DECL_LIST_NODE: emit_var_decl_list(ast); break;
         case USER_FUNC_CALL_NODE: emit_user_func_call(ast); break;

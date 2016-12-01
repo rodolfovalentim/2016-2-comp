@@ -255,16 +255,15 @@ int main() {
   AuxT = create_aux_table();
 
   if (yyparse() == 0) {
-      /*printf("PARSE SUCESSFUL!\n\n");*/
+      stdin = fopen(ctermid(NULL), "r");
       emit_code(tree);
-/*
-      print_lit_table(LitT);
+/*    print_lit_table(LitT);
       printf("\n\n");
       print_sym_table(SymT);
       printf("\n\n");
       print_func_table(FuncT);
-      printf("\n\n");
-      print_dot(tree);*/
+      printf("\n\n");*/
+      //print_dot(tree);
 
   }
 
