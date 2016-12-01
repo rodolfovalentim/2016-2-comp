@@ -70,7 +70,10 @@ void emit_id(Tree *ast){
                         set_var_memoffset(SymT, get_index(ast), new_tmp(size));
                 }
                 else {
-                        get_var_memoffset(SymT, get_index(ast));
+                        rec_emit_ast(get_child(ast, 0));
+                        int index = pop(stack);
+                        int offset = get_var_memoffset(SymT, get_index(ast));
+                        push(stack, tmp[index + offset]);
                 }
         }
 }
@@ -80,10 +83,13 @@ void emit_num(Tree *ast){
 }
 
 void emit_param_list(Tree *ast) {
+        declaration = 1;
         for(int i = 0; i < get_children_size(ast); i++) {
-                int value = pop(stack);
-                get_child(ast, i);
+                rec_emit_ast(get_child(ast, i));
+                int offset = get_var_memoffset(SymT, get_index(get_child(ast, i)));
+                tmp[offset] = pop(stack);
         }
+        declaration = 0;
 }
 
 void emit_func_body(Tree *ast){
@@ -125,7 +131,7 @@ void emit_user_func_call(Tree *ast){
 }
 
 void emit_arg_list(Tree *ast){
-        for(int i = get_children_size(ast); i < 0; i--) {
+        for(int i = get_children_size(ast); i > 0; i--) {
                 rec_emit_ast(get_child(ast, i-1));
         }
 }
@@ -143,7 +149,14 @@ void emit_string(Tree *ast){
 void emit_assign(Tree *ast){
         rec_emit_ast(get_child(ast, 1));
         int s = pop(stack);
-        tmp[get_var_memoffset(SymT, get_index(get_child(ast, 0)))] = s;
+        Tree* var = get_child(ast, 0);
+        char* type = get_type(var);
+        int offset = get_var_memoffset(SymT, get_index(var));
+        if(!strcmp(type, "cvar")) {
+                rec_emit_ast(get_child(var, 0));
+                offset += pop(stack);
+        }
+        tmp[offset] = s;
 }
 
 void emit_plus(Tree *ast){
@@ -247,21 +260,20 @@ void emit_while(Tree* ast){
 
 void emit_return(Tree *ast){
         rec_emit_ast(get_child(ast, 0));
-        int value = pop(stack); // Dumb?
-        printf("Value: %d\n", value);
+        int value = pop(stack);
         push(stack, value);
 }
 
 void rec_emit_ast(Tree *ast) {
         char string[10];
         node2str(ast, string);
-        fprintf(stderr, "%s\n", string);
+        fprintf(stderr, "Kind: %s\n", string);
         switch(get_kind(ast)) {
         case IF_NODE: emit_if(ast); break;
         case INPUT_NODE: emit_input(ast); break;
         case INT_NODE: emit_int(ast); break;
         case OUTPUT_NODE: emit_output(ast); break;
-        // case RETURN_NODE: emit_return(ast); break;
+        case RETURN_NODE: emit_return(ast); break;
         case VOID_NODE: emit_void(ast); break;
         case WHILE_NODE: emit_while(ast); break;
         case WRITE_NODE: emit_write(ast); break;
@@ -284,8 +296,6 @@ void rec_emit_ast(Tree *ast) {
         case FUNC_HEADER_NODE: emit_func_header(ast); break;
         case FUNC_BODY_NODE: emit_func_body(ast); break;
         case PARAM_LIST_NODE: emit_param_list(ast); break;
-        // case PARAM_NODE: emit_param(ast); break;
-        // case STMT_LIST_NODE: emit_stmt_list(ast); break;
         case ARG_LIST_NODE: emit_arg_list(ast); break;
         case BLOCK_NODE: emit_block(ast); break;
         case VAR_DECL_LIST_NODE: emit_var_decl_list(ast); break;
