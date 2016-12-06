@@ -17,6 +17,7 @@
 #include "tables.h"
 
 void process_error();
+void string_processing(char* string);
 
 extern LitTable* LitT;
 extern SymTable* SymT;
@@ -69,7 +70,7 @@ comments   "/*"
 
 {number}			{ yylval = new_node(NUM_NODE);    set_type(yylval, "num");    set_index(yylval, atoi(yytext));                                           return NUM;    }
 {identifier}  { yylval = new_node(ID_NODE);     set_type(yylval, "id");     int index = add_id(AuxT, yytext);                set_index(yylval, index); return ID;     }
-{string}			{ yylval = new_node(STRING_NODE); set_type(yylval, "string"); int index = add_literal(LitT, yytext, "string"); set_index(yylval, index); return STRING; }
+{string}			{ yylval = new_node(STRING_NODE); set_type(yylval, "string"); string_processing(yytext); int index = add_literal(LitT, yytext, "string"); set_index(yylval, index); return STRING; }
 
 [ \t]+			                     /* eat up whitespace */
 "\n"			           yylineno++; /* eat up a single line */
@@ -89,4 +90,23 @@ comments   "/*"
 void process_error() {
 	printf("SCANNING ERROR (%d): Unknown symbol %s\n", yylineno, yytext);
     exit(1);
+}
+
+void string_processing(char* string){
+  char tmp[10000];
+	int i;
+  for(i = 1; string[i+1] != '\0'; i++){
+    if((string[i] == 92) && (string[i+1] == 'n')) {
+      tmp[i-1] = 10;
+      i = i + 1;
+    }
+    else {
+      tmp[i-1] = string[i];
+    }
+  }
+  tmp[i-1] = '\0';
+	strcpy(string, tmp);
+	/* I have no idea why a have to do this */
+	if (string[strlen(string) - 1] == 32 && string[strlen(string) - 2] == 10)
+		string[strlen(string) - 1] = 0;
 }

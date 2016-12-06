@@ -32,7 +32,6 @@ Tree* new_node(NodeKind kind) {
 void add_child(Tree *parent, Tree *child) {
         if (parent->count == CHILDREN_LIMIT) {
                 Tree** tmp;
-                // fprintf(stderr, "Reallocing to add another child!\n");
                 tmp = (Tree**)realloc(parent->child, (CHILDREN_LIMIT+=100)*sizeof(Tree*));
                 parent->child = tmp;
         }

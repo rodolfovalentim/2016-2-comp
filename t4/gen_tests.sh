@@ -2,9 +2,9 @@
 
 DATA=/home/rodolfo/Workspace/2016-2-comp
 IN=$DATA/in
-OUT=$DATA/t3/my-out
+OUT=$DATA/t4/my-out
 
-EXE=./trab3
+EXE=./trab4
 DOT="dot -Tpdf"
 
 rm -rf $OUT

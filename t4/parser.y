@@ -256,15 +256,14 @@ int main() {
 
   if (yyparse() == 0) {
       stdin = fopen(ctermid(NULL), "r");
-      emit_code(tree);
-/*    print_lit_table(LitT);
+      run_code(tree);
+   /* print_lit_table(LitT);
       printf("\n\n");
       print_sym_table(SymT);
       printf("\n\n");
       print_func_table(FuncT);
-      printf("\n\n");*/
-    //print_dot(tree);
-
+      printf("\n\n"); */
+   // print_dot(tree);
   }
 
   free_tree(tree);
